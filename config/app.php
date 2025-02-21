@@ -170,6 +170,8 @@ return [
         App\Providers\RouteServiceProvider::class,
         Spatie\Html\HtmlServiceProvider::class,
         Yajra\DataTables\DataTablesServiceProvider::class,
+        Spatie\Permission\PermissionServiceProvider::class,
+
     ])->toArray(),
 
     /*
@@ -187,6 +189,9 @@ return [
         // 'Example' => App\Facades\Example::class,
         // 'Form' => Collective\Html\FormFacade::class,
         'Html' => Spatie\Html\HtmlFacade::class,
+        'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
+        'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+        'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
     ])->toArray(),
 
 ];

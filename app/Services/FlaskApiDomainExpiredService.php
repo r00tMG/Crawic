@@ -13,23 +13,35 @@ class FlaskApiDomainExpiredService
         $this->apiBaseUrl = config('services.flask_api.url');
     }
 
-    public function getData()
+    public function getData($page = 1, $perPage = 5000)
     {
-        $response = Http::sink(storage_path('app/get_deleted_domains.json'))
-            ->get("{$this->apiBaseUrl}/get_deleted_domains");
+        $queryParams = [
+            'page' => $page,
+            'per_page' => $perPage,
+        ];
+        $username = 'crawic';  
+        $password = 'password'; 
+        $response = Http::timeout(120)
+        ->withBasicAuth($username, $password)
+        ->get("{$this->apiBaseUrl}/get_deleted_domains", $queryParams);
 
+            logger("Requête envoyée à l'API Flask", [
+                'query_params' => $queryParams,
+                'response_status' => $response->status(),
+                'response_body' => $response->body(),
+            ]);
         if ($response->successful()) {
-            $filePath = storage_path('app/get_deleted_domains.json');
+            //$filePath = storage_path('app/get_deleted_domains.json');
             
             // Lire et décoder le fichier JSON
             try {
-                $jsonData = json_decode(file_get_contents($filePath), true);
+                //$jsonData = json_decode(file_get_contents($filePath), true);
                 logger("Réponse API reçue", [
                     'status' => $response->status(),
-                    'json_data' => $jsonData
+                    'json_data' => $response->json()
                 ]);
                 if (json_last_error() === JSON_ERROR_NONE) {
-                    return $jsonData;
+                    return $response->json();
                 } else {
                     throw new \Exception("Erreur lors du décodage JSON : " . json_last_error_msg());
                 }
@@ -92,6 +104,20 @@ class FlaskApiDomainExpiredService
             // En cas d'erreur, on considère que le domaine n'est pas indexé
             return false;
         }
+    }
+    public function assignCategories(array $domain): array
+    {
+        $categoryKeywords = config('categories.keywords');
+
+        $matchedCategories = [];
+        foreach ($categoryKeywords as $pattern => $categoryId) {
+            if (preg_match("/$pattern/i", $domain['domain'])) {
+                $matchedCategories[] = $categoryId;
+            }
+        }
+        print('matchedCategories:');
+        print_r($matchedCategories);
+        return $matchedCategories;
     }
 
     private function checkSuspiciousContent($domain)

@@ -1,7 +1,6 @@
 <ul id="navigation" class="slimmenu">
 
 
-
     <li class="main-menu option-one"><a href="javascript:void(0)" {!! (Request::is('admin') || Request::is('admin/index1') ? 'class="menu-list active"' : 'menu-list' ) !!}><span class="d-block d-lg-none">Index</span><span class="d-none d-lg-block">Dashboards</span></a>
         <ul>
 

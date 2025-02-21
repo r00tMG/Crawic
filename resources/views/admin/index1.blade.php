@@ -40,7 +40,6 @@ Josh Admin Template
     </div> -->
     @endif
     <?php
-        file_get_contents(url('/api/expired-domains'));
         $today = \Carbon\Carbon::now()->toDateString();
         $eda = \DB::table('expiry_domain_cronjob')->whereDate('created_at', $today)->first();
     ?>

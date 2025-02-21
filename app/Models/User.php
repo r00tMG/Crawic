@@ -8,12 +8,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
-
-    use SoftDeletes;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -22,8 +21,19 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'first_name',
+        'last_name',
         'email',
         'password',
+        'gender',
+        'dob',
+        'pic',
+        'country',
+        'state',
+        'city',
+        'address',
+        'postal',
+        'email_verified_at'
     ];
 
     /**
@@ -44,10 +54,36 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'dob' => 'date',
     ];
 
+    /**
+     * Get the user's full name.
+     *
+     * @return string
+     */
+    public function getNameAttribute()
+    {
+        return "{$this->first_name} {$this->last_name}";
+    }
 
-    public function getRoles(){
-        return \DB::table('role_users')->where('user_id',$this->id)->get();
+    /**
+     * Get user roles using Spatie Permission
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function getRoles()
+    {
+        return $this->roles;
+    }
+
+    /**
+     * Check if user is admin
+     *
+     * @return bool
+     */
+    public function getIsAdminAttribute()
+    {
+        return $this->hasRole('admin');
     }
 }

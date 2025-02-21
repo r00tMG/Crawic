@@ -121,15 +121,13 @@
                                                         </tr>
                                                         <tr>
                                                             <td>@lang('users/title.dob')</td>
-
-                                                            @if($user->dob=='0000-00-00')
-                                                                <td>
-                                                                </td>
-                                                            @else
-                                                                <td>
+                                                            <td>
+                                                                @if($user->dob=='0000-00-00')
+                                                                    {{-- Empty cell if no date --}}
+                                                                @else
                                                                     {{ $user->dob }}
-                                                                </td>
-                                                            @endif
+                                                                @endif
+                                                            </td>
                                                         </tr>
                                                         <tr>
                                                             <td>@lang('users/title.country')</td>
@@ -164,20 +162,19 @@
                                                         <tr>
                                                             <td>@lang('users/title.status')</td>
                                                             <td>
-
                                                                 @if($user->deleted_at)
-                                                                    Deleted
-                                                                @elseif($activation = Activation::completed($user))
-                                                                    Activated
+                                                                    <span class="badge badge-danger">Deleted</span>
+                                                                @elseif($user->email_verified_at)
+                                                                    <span class="badge badge-success">Verified</span>
                                                                 @else
-                                                                    Pending
+                                                                    <span class="badge badge-warning">Pending</span>
                                                                 @endif
                                                             </td>
                                                         </tr>
                                                         <tr>
                                                             <td>@lang('users/title.created_at')</td>
                                                             <td>
-                                                                {!! $user->created_at->diffForHumans() !!}
+                                                                {{ $user->created_at->diffForHumans() }}
                                                             </td>
                                                         </tr>
                                                     </table>

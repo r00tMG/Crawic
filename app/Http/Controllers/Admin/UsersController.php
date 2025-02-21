@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\JoshController;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\UserRequest;
 use App\Mail\Register;
 use App\Mail\Restore;
@@ -19,10 +19,19 @@ use Sentinel;
 use URL;
 use Validator;
 use Yajra\DataTables\DataTables;
+use Spatie\Permission\Models\Role;
 
-class UsersController extends JoshController
+class UsersController extends Controller
 {
-    protected $countries;
+    protected $countries = [
+        'FR' => 'France',
+        'US' => 'United States',
+        'GB' => 'United Kingdom',
+        'DE' => 'Germany',
+        'IT' => 'Italy',
+        'ES' => 'Spain',
+        // Ajoutez d'autres pays selon vos besoins
+    ];
     /**
      * Show a list of all the users.
      *
@@ -34,248 +43,171 @@ class UsersController extends JoshController
         $this->countries = Country::all()->pluck('name', 'sortname')->toArray();
     }
 
-    public function index()
+    public function index(Request $request)
     {
+        if ($request->ajax()) {
+            $users = User::with('roles')->get();
+            
+            return datatables()
+                ->of($users)
+                ->addColumn('actions', function ($user) {
+                    $actions = '<a href="' . route('users.show', $user) . '" class="btn btn-sm btn-info"><i class="fa fa-eye"></i></a> ';
+                    $actions .= '<a href="' . route('users.edit', $user) . '" class="btn btn-sm btn-primary"><i class="fa fa-edit"></i></a> ';
+                    
+                    if (auth()->id() !== $user->id) {
+                        $actions .= '<form method="POST" action="' . route('users.destroy', $user) . '" style="display:inline">
+                            ' . csrf_field() . '
+                            ' . method_field('DELETE') . '
+                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm(\'Are you sure?\')">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </form>';
+                    }
+                    
+                    return $actions;
+                })
+                ->rawColumns(['actions'])
+                ->make(true);
+        }
 
-        // Show the page
         return view('admin.users.index');
     }
 
-    /*
-     * Pass data through ajax call
-     */
     /**
-     * @return mixed
-     */
-    public function data()
-    {
-        $users = User::get(['id', 'first_name', 'last_name', 'email','created_at']);
-        return DataTables::of($users)
-            ->editColumn(
-        'created_at',
-                function (User $user) {
-                    return $user->created_at->diffForHumans();
-                }
-            )
-            ->addColumn(
-                'status',
-                function ($user) {
-                    // if ($activation = Activation::completed($user)) {
-                        return 'Activated';
-                    // }
-                    // return 'Pending';
-
-                
-                }
-            )
-            ->addColumn(
-                'actions',
-                function ($user) {
-                    $actions = '<a href='. route('admin.users.show', $user->id) .'><i class="livicon" data-name="info" data-size="18" data-loop="true" data-c="#428BCA" data-hc="#428BCA" title="view user"></i></a>
-                            <a href='. route('admin.users.edit', $user->id) .'><i class="livicon" data-name="edit" data-size="18" data-loop="true" data-c="#428BCA" data-hc="#428BCA" title="update user"></i></a>';
-                    if ((Sentinel::getUser()->id !== $user->id) && ($user->id > 2)) {
-                        $actions .= '<a href='. route('admin.users.confirm-delete', $user->id) .' data-id="'.$user->id.'" data-toggle="modal" data-target="#delete_confirm"><i class="livicon" data-name="user-remove" data-size="18" data-loop="true" data-c="#f56954" data-hc="#f56954" title="delete user"></i></a>';
-                    }
-                    return $actions;
-                }
-            )
-            ->rawColumns(['actions'])
-            ->make(true);
-    }
-
-    /**
-     * Create new user
+     * Show the form for creating a new user
      *
-     * @return View
+     * @return \Illuminate\View\View
      */
     public function create()
     {
-        // Get all the available roles
-        $roles = Sentinel::getRoleRepository()->all();
+        // Get all available roles using Spatie Permission
+        $roles = Role::all();
         $countries = $this->countries;
-        // Show the page
+
         return view('admin.users.create', compact('roles', 'countries'));
     }
 
     /**
-     * User create form processing.
+     * Store a newly created user
      *
-     * @return Redirect
+     * @param UserRequest $request
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function store(UserRequest $request)
     {
-
-        //upload image
-        if ($file = $request->file('pic_file')) {
-            $extension = $file->extension() ?: 'png';
-            $destinationPath = public_path() . '/uploads/users/';
-            $safeName = \Illuminate\Support\Str::random(10) . '.' . $extension;
-            $file->move($destinationPath, $safeName);
-            $request['pic'] = url('/').'/uploads/users/'.$safeName;
-        }
-        //check whether use should be activated by default or not
-        $activate = $request->get('activate') ? true : false;
         try {
-            // Register the user
-            $user = Sentinel::register($request->except('_token', 'password_confirm', 'role', 'activate', 'pic_file', 'g-recaptcha-response'), $activate);
-            //add user to 'User' role
-            $role = Sentinel::findRoleById($request->get('role'));
-            if ($role) {
-                $role->users()->attach($user);
-            }
-            //check for activation and send activation mail if not activated by default
-            if (! $request->get('activate')) {
-                // Data to be used on the email view
-                $data = [
-                    'user_name' => $user->first_name .' '. $user->last_name,
-                    'activationUrl' => URL::route('activate', [$user->id, Activation::create($user)->code]),
-                ];
-                // Send the activation code through email
-                Mail::to($user->email)
-                    ->send(new Register($data));
-            }
-            // Activity log for New user create
-            activity($user->full_name)
-                ->performedOn($user)
-                ->causedBy($user)
-                ->log('New User Created by '.Sentinel::getUser()->full_name);
-            // Redirect to the home page with success menu
-            return Redirect::route('admin.users.index')->with('success', trans('users/message.success.create'));
-        } catch (LoginRequiredException $e) {
-            $error = trans('admin/users/message.user_login_required');
-        } catch (PasswordRequiredException $e) {
-            $error = trans('admin/users/message.user_password_required');
-        } catch (UserExistsException $e) {
-            $error = trans('admin/users/message.user_exists');
-        }
+            // Create the user
+            $user = User::create([
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'gender' => $request->gender,
+                'dob' => $request->dob,
+                'country' => $request->country,
+                'state' => $request->state,
+                'city' => $request->city,
+                'address' => $request->address,
+                'postal' => $request->postal,
+                'email_verified_at' => now() // Marquer comme vérifié par défaut
+            ]);
 
-        // Redirect to the user creation page
-        return Redirect::back()->withInput()->with('error', $error);
+            // Assign roles if provided
+            if ($request->has('roles')) {
+                $user->assignRole($request->roles);
+            }
+
+            // Handle profile picture upload if provided
+            if ($request->hasFile('pic')) {
+                $file = $request->file('pic');
+                $filename = time() . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('uploads/users'), $filename);
+                $user->pic = $filename;
+                $user->save();
+            }
+
+            return redirect()
+                ->route('users.index')
+                ->with('success', trans('users/message.success.create'));
+
+        } catch (\Exception $e) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', trans('users/message.error.create'));
+        }
     }
 
     /**
-     * User update.
+     * Display specified user profile.
      *
-     * @param  int $id
+     * @param  User $user
+     * @return \Illuminate\View\View
+     */
+    public function show(User $user)
+    {
+        if ($user->country) {
+            $user->country = $this->countries[$user->country] ?? $user->country;
+        }
+
+        return view('admin.users.show', compact('user'));
+    }
+
+    /**
+     * Show the form for editing the specified user.
      *
-     * @return View
+     * @param  User $user
+     * @return \Illuminate\View\View
      */
     public function edit(User $user)
     {
+        // Get this user roles using Spatie Permission
+        $userRoles = $user->roles->pluck('name', 'id')->all();
+        
+        // Get all available roles
+        $roles = Role::all();
 
-        // Get this user roles
-        $userRoles = $user->getRoles()->pluck('name', 'id')->all();
-        // Get a list of all the available roles
-        $roles = Sentinel::getRoleRepository()->all();
-        $status = 'Activated'; //Activation::completed($user);
+        $status = $user->email_verified_at ? 'Verified' : 'Pending';
+        
+        // Get countries list from protected property
         $countries = $this->countries;
-        // Show the page
+        
         return view('admin.users.edit', compact('user', 'roles', 'userRoles', 'countries', 'status'));
     }
 
     /**
-     * User update form processing page.
+     * Update the specified user.
      *
-     * @param  User        $user
      * @param  UserRequest $request
-     *
-     * @return Redirect
+     * @param  User $user
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(User $user, UserRequest $request)
+    public function update(UserRequest $request, User $user)
     {
         try {
-            $user->update($request->except('pic_file', 'password', 'password_confirm', 'roles', 'activate'));
-            if (! empty($request->password)) {
+            $user->fill($request->except('password', 'roles'));
+
+            if ($request->filled('password')) {
                 $user->password = Hash::make($request->password);
             }
 
-            // is new image uploaded?
-            if ($file = $request->file('pic_file')) {
-                $extension = $file->extension() ?: 'png';
-                $destinationPath = public_path() . '/uploads/users/';
-                $safeName = \Illuminate\Support\Str::random(10) . '.' . $extension;
-                $file->move($destinationPath, $safeName);
-                //delete old pic if exists
-                if (File::exists($destinationPath . $user->pic)) {
-                    File::delete($destinationPath . $user->pic);
-                }
-                //save new file path into db
-                $user->pic = url('/').'/uploads/users/'.$safeName;
-            }
-
-            //save record
             $user->save();
-            // Get the current user roles
-            $userRoles = $user->roles()->pluck('id')->all();
-            // Get the selected roles
 
-            $selectedRoles = $request->get('roles');
-            // Roles comparison between the roles the user currently
-            // have and the roles the user wish to have.
-            $rolesToAdd = array_diff($selectedRoles, $userRoles);
-            $rolesToRemove = array_diff($userRoles, $selectedRoles);
-            // Assign the user to roles
-
-            foreach ($rolesToAdd as $roleId) {
-                $role = Sentinel::findRoleById($roleId);
-                $role->users()->attach($user);
+            // Update roles if provided
+            if ($request->has('roles')) {
+                $user->syncRoles($request->roles);
             }
 
-            // Remove the user from roles
-            foreach ($rolesToRemove as $roleId) {
-                $role = Sentinel::findRoleById($roleId);
-                $role->users()->detach($user);
-            }
+            return redirect()
+                ->route('users.show', $user)
+                ->with('success', trans('users/message.success.update'));
 
-            // Activate / De-activate user
-
-            $status = $activation = Activation::completed($user);
-            if ($request->get('activate') !== $status) {
-                if ($request->get('activate')) {
-                    $activation = Activation::exists($user);
-                    if ($activation) {
-                        Activation::complete($user, $activation->code);
-                    }
-                } else {
-                    //remove existing activation record
-                    Activation::remove($user);
-                    //add new record
-                    Activation::create($user);
-                    //send activation mail
-                    $data = [
-                        'user_name' => $user->first_name .' '. $user->last_name,
-                        'activationUrl' => URL::route('activate', [$user->id, Activation::exists($user)->code]),
-                    ];
-                    // Send the activation code through email
-                    Mail::to($user->email)
-                        ->send(new Restore($data));
-                }
-            }
-
-            // Was the user updated?
-            if ($user->save()) {
-                // Prepare the success message
-                $success = trans('users/message.success.update');
-                //Activity log for user update
-                activity($user->full_name)
-                    ->performedOn($user)
-                    ->causedBy($user)
-                    ->log('User Updated by '.Sentinel::getUser()->full_name);
-                // Redirect to the user page
-                return Redirect::route('admin.users.edit', $user)->with('success', $success);
-            }
-
-            // Prepare the error message
-            $error = trans('users/message.error.update');
-        } catch (UserNotFoundException $e) {
-            // Prepare the error message
-            $error = trans('users/message.user_not_found', compact('id'));
-            // Redirect to the user management page
-            return Redirect::route('admin.users.index')->with('error', $error);
+        } catch (\Exception $e) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', trans('users/message.error.update'));
         }
-
-        // Redirect to the user page
-        return Redirect::route('admin.users.edit', $user)->withInput()->with('error', $error);
     }
 
     /**
@@ -321,118 +253,44 @@ class UsersController extends JoshController
     }
 
     /**
-     * Delete the given user.
+     * Remove the specified user from storage.
      *
-     * @param  int $id
-     *
-     * @return Redirect
+     * @param  User $user
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function destroy($id)
+    public function destroy(User $user)
     {
         try {
-            // Get user information
-            $user = Sentinel::findById($id);
-            // Check if we are not trying to delete ourselves
-            if ($user->id === Sentinel::getUser()->id) {
-                // Prepare the error message
-                $error = trans('admin/users/message.error.delete');
-                // Redirect to the user management page
-                return Redirect::route('admin.users.index')->with('error', $error);
-            }
-            // Delete the user
-            //to allow soft deleted, we are performing query on users model instead of Sentinel model
-            User::destroy($id);
-            Activation::where('user_id', $user->id)->delete();
-            // Prepare the success message
-            $success = trans('users/message.success.delete');
-            //Activity log for user delete
-            activity($user->full_name)
-                ->performedOn($user)
-                ->causedBy($user)
-                ->log('User deleted by '.Sentinel::getUser()->full_name);
-            // Redirect to the user management page
-            return Redirect::route('admin.users.index')->with('success', $success);
-        } catch (UserNotFoundException $e) {
-            // Prepare the error message
-            $error = trans('admin/users/message.user_not_found', compact('id'));
-            // Redirect to the user management page
-            return Redirect::route('admin.users.index')->with('error', $error);
+            $user->delete();
+            return redirect()
+                ->route('users.index')
+                ->with('success', trans('users/message.success.delete'));
+
+        } catch (\Exception $e) {
+            return redirect()
+                ->back()
+                ->with('error', trans('users/message.error.delete'));
         }
     }
 
     /**
-     * Restore a deleted user.
+     * Reset user password.
      *
-     * @param  int $id
-     *
-     * @return Redirect
+     * @param  Request $request
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function getRestore($id)
+    public function passwordReset(Request $request)
     {
         try {
-            // Get user information
-            $user = User::withTrashed()->find($id);
-            // Restore the user
-            $user->restore();
-            // create activation record for user and send mail with activation link
-            //            $data->user_name = $user->first_name .' '. $user->last_name;
-            //            $data->activationUrl = URL::route('activate', [$user->id, Activation::create($user)->code]);
-            // Send the activation code through email
-            $data = [
-                'user_name' => $user->first_name .' '. $user->last_name,
-                'activationUrl' => URL::route('activate', [$user->id, Activation::create($user)->code]),
-            ];
-            Mail::to($user->email)
-                ->send(new Restore($data));
-            // Prepare the success message
-            $success = trans('users/message.success.restored');
-            activity($user->full_name)
-                ->performedOn($user)
-                ->causedBy($user)
-                ->log('User restored by '.Sentinel::getUser()->full_name);
-            // Redirect to the user management page
-            return Redirect::route('admin.deleted_users')->with('success', $success);
-        } catch (UserNotFoundException $e) {
-            // Prepare the error message
-            $error = trans('users/message.user_not_found', compact('id'));
-            // Redirect to the user management page
-            return Redirect::route('admin.deleted_users')->with('error', $error);
-        }
-    }
+            $user = User::findOrFail($request->id);
+            $user->password = Hash::make($request->password);
+            $user->save();
 
-    /**
-     * Display specified user profile.
-     *
-     * @param  int $id
-     *
-     * @return Response
-     */
-    public function show($id)
-    {
-        try {
-            // Get the user information
-            $user = Sentinel::findUserById($id);
-            //get country name
-            if ($user->country) {
-                $user->country = $this->countries[$user->country];
-            }
-        } catch (UserNotFoundException $e) {
-            // Prepare the error message
-            $error = trans('users/message.user_not_found', compact('id'));
-            // Redirect to the user management page
-            return Redirect::route('admin.users.index')->with('error', $error);
-        }
-        // Show the page
-        return view('admin.users.show', compact('user'));
-    }
+            return response()->json(['success' => true]);
 
-    public function passwordreset(Request $request)
-    {
-        $id = $request->id;
-        $user = Sentinel::findUserById($id);
-        $password = $request->get('password');
-        $user->password = Hash::make($password);
-        $user->save();
+        } catch (\Exception $e) {
+            return response()->json(['success' => false], 500);
+        }
     }
 
     public function import()

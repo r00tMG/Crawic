@@ -1,7 +1,7 @@
 <ul id="menu" class="page-sidebar-menu">
 
-    <li {!! (Request::is('dashboard') ? 'class="active"' : '' ) !!}>
-        <a href="{{ url('dashboard') }}">
+    <li class="{{ request()->is('dashboard') ? 'active' : '' }}">
+        <a href="{{ route('dashboard') }}">
             <i class="livicon" data-name="dashboard" data-size="18" data-c="#418BCA" data-hc="#418BCA" data-loop="true"></i>
             <span class="title">Dashboard</span>
         </a>
@@ -70,12 +70,7 @@
 
                 </ul>
             </li>
-            <!-- <li {!! (Request::is('admin/laravel_charts') ? 'class="active"' : '' ) !!}>
-                <a href="{{ URL::to('admin/laravel_charts') }}">
-                    <i class="fa fa-angle-double-right"></i>
-                    Domain Analysis
-                </a>
-            </li> -->
+            
             
         </ul>
     </li>
@@ -291,214 +286,9 @@
                    Whois Lookup
                 </a>
             </li>
-
-            
-            <!-- <li {!! (Request::is('admin/database_charts') ? 'class="active"' : '' ) !!}>
-                <a href="{{ URL::to('admin/database_charts') }}">
-                    <i class="fa fa-angle-double-right"></i>
-                   One-Page SEO Checker
-                </a>
-            </li>
-            <li {!! (Request::is('admin/database_charts') ? 'class="active"' : '' ) !!}>
-                <a href="{{ URL::to('admin/database_charts') }}">
-                    <i class="fa fa-angle-double-right"></i>
-                   Backlink Audit
-                </a>
-            </li>
-            <li {!! (Request::is('admin/database_charts') ? 'class="active"' : '' ) !!}>
-                <a href="{{ URL::to('admin/database_charts') }}">
-                    <i class="fa fa-angle-double-right"></i>
-                   Organic Traffice Insights
-                </a>
-            </li>
-            <li {!! (Request::is('admin/database_charts') ? 'class="active"' : '' ) !!}>
-                <a href="{{ URL::to('admin/database_charts') }}">
-                    <i class="fa fa-angle-double-right"></i>
-                   Link Building Tool
-                </a>
-            </li>
-            <li {!! (Request::is('admin/database_charts') ? 'class="active"' : '' ) !!}>
-                <a href="{{ URL::to('admin/database_charts') }}">
-                    <i class="fa fa-angle-double-right"></i>
-                   PPC Keyword Tool
-                </a>
-            </li>
-            <li {!! (Request::is('admin/database_charts') ? 'class="active"' : '' ) !!}>
-                <a href="{{ URL::to('admin/database_charts') }}">
-                    <i class="fa fa-angle-double-right"></i>
-                   Social Meida Tracker
-                </a>
-            </li>
-            <li {!! (Request::is('admin/database_charts') ? 'class="active"' : '' ) !!}>
-                <a href="{{ URL::to('admin/database_charts') }}">
-                    <i class="fa fa-angle-double-right"></i>
-                   Social Media Poster
-                </a>
-            </li> -->
         </ul>
     </li>
-    <!-- <li {!! ( Request::is('admin/laravel_charts') || Request::is('admin/database_charts') ? 'class="active"' : '' ) !!}>
-        <a href="#">
-            <i class="livicon" data-name="globe" data-size="18" data-c="#67c5df" data-hc="#67c5df" data-loop="true"></i>
-            <span class="title">Projects Setup</span>
-            <span class="fa arrow"></span>
-        </a>
-        <ul class="sub-menu">
-            <li {!! (Request::is('admin/laravel_charts') ? 'class="active"' : '' ) !!}>
-                <a href="{{ URL::to('admin/laravel_charts') }}">
-                    <i class="fa fa-angle-double-right"></i>
-                    Position Tracking
-                </a>
-            </li>
-            <li {!! (Request::is('admin/database_charts') ? 'class="active"' : '' ) !!}>
-                <a href="{{ URL::to('admin/database_charts') }}">
-                    <i class="fa fa-angle-double-right"></i>
-                   Site Audit
-                </a>
-            </li>
-            <li {!! (Request::is('admin/database_charts') ? 'class="active"' : '' ) !!}>
-                <a href="{{ URL::to('admin/database_charts') }}">
-                    <i class="fa fa-angle-double-right"></i>
-                   One-Page SEO Checker
-                </a>
-            </li>
-            <li {!! (Request::is('admin/database_charts') ? 'class="active"' : '' ) !!}>
-                <a href="{{ URL::to('admin/database_charts') }}">
-                    <i class="fa fa-angle-double-right"></i>
-                   Backlink Audit
-                </a>
-            </li>
-            <li {!! (Request::is('admin/database_charts') ? 'class="active"' : '' ) !!}>
-                <a href="{{ URL::to('admin/database_charts') }}">
-                    <i class="fa fa-angle-double-right"></i>
-                   Organic Traffice Insights
-                </a>
-            </li>
-            <li {!! (Request::is('admin/database_charts') ? 'class="active"' : '' ) !!}>
-                <a href="{{ URL::to('admin/database_charts') }}">
-                    <i class="fa fa-angle-double-right"></i>
-                   Link Building Tool
-                </a>
-            </li>
-            <li {!! (Request::is('admin/database_charts') ? 'class="active"' : '' ) !!}>
-                <a href="{{ URL::to('admin/database_charts') }}">
-                    <i class="fa fa-angle-double-right"></i>
-                   PPC Keyword Tool
-                </a>
-            </li>
-            <li {!! (Request::is('admin/database_charts') ? 'class="active"' : '' ) !!}>
-                <a href="{{ URL::to('admin/database_charts') }}">
-                    <i class="fa fa-angle-double-right"></i>
-                   Social Meida Tracker
-                </a>
-            </li>
-            <li {!! (Request::is('admin/database_charts') ? 'class="active"' : '' ) !!}>
-                <a href="{{ URL::to('admin/database_charts') }}">
-                    <i class="fa fa-angle-double-right"></i>
-                   Social Media Poster
-                </a>
-            </li>
-        </ul>
-    </li> -->
-    <!-- <li {!! ( Request::is('admin/laravel_charts') || Request::is('admin/database_charts') ? 'class="active"' : '' ) !!}>
-        <a href="#">
-            <i class="livicon" data-name="biohazard" data-size="18" data-c="#01bc8c" data-hc="#01bc8c" data-loop="true"></i>
-            <span class="title">SEO Management</span>
-            <span class="fa arrow"></span>
-        </a>
-        <ul class="sub-menu">
-            <li {!! (Request::is('admin/laravel_charts') ? 'class="active"' : '' ) !!}>
-                <a href="{{ URL::to('admin/laravel_charts') }}">
-                    <i class="fa fa-angle-double-right"></i>
-                    Domain Overview
-                </a>
-            </li>
-            <li {!! (Request::is('admin/database_charts') ? 'class="active"' : '' ) !!}>
-                <a href="{{ URL::to('admin/database_charts') }}">
-                    <i class="fa fa-angle-double-right"></i>
-                   Traffic Analytics
-                </a>
-            </li>
-            <li {!! (Request::is('admin/database_charts') ? 'class="active"' : '' ) !!}>
-                <a href="{{ URL::to('admin/database_charts') }}">
-                    <i class="fa fa-angle-double-right"></i>
-                   One-Page SEO Checker
-                </a>
-            </li>
-            <li {!! (Request::is('admin/database_charts') ? 'class="active"' : '' ) !!}>
-                <a href="{{ URL::to('admin/database_charts') }}">
-                    <i class="fa fa-angle-double-right"></i>
-                   Position Tracking
-                </a>
-            </li>
-            <li {!! (Request::is('admin/database_charts') ? 'class="active"' : '' ) !!}>
-                <a href="{{ URL::to('admin/database_charts') }}">
-                    <i class="fa fa-angle-double-right"></i>
-                   Organic Traffice Insights
-                </a>
-            </li>
-            <li {!! (Request::is('admin/database_charts') ? 'class="active"' : '' ) !!}>
-                <a href="{{ URL::to('admin/database_charts') }}">
-                    <i class="fa fa-angle-double-right"></i>
-                    SEO Content Template
-                </a>
-            </li>
-        </ul>
-    </li> -->
-    <!-- <li {!! ( Request::is('admin/laravel_charts') || Request::is('admin/database_charts') ? 'class="active"' : '' ) !!}>
-        <a href="#">
-            <i class="livicon" data-name="key" data-size="18" data-c="#f89a14" data-hc="#f89a14" data-loop="true"></i>
-            <span class="title">Keyword Management</span>
-            <span class="fa arrow"></span>
-        </a>
-        <ul class="sub-menu">
-            <li {!! (Request::is('admin/laravel_charts') ? 'class="active"' : '' ) !!}>
-                <a href="{{ URL::to('admin/laravel_charts') }}">
-                    <i class="fa fa-angle-double-right"></i>
-                    Keyword Gap/Manager
-                </a>
-            </li>
-            <li {!! (Request::is('admin/database_charts') ? 'class="active"' : '' ) !!}>
-                <a href="{{ URL::to('admin/database_charts') }}">
-                    <i class="fa fa-angle-double-right"></i>
-                    Keyword Overview
-                </a>
-            </li>
-            <li {!! (Request::is('admin/database_charts') ? 'class="active"' : '' ) !!}>
-                <a href="{{ URL::to('admin/database_charts') }}">
-                    <i class="fa fa-angle-double-right"></i>
-                   Keyword Magic Tool
-                </a>
-            </li>
-        </ul>
-    </li> -->
-    <!-- <li {!! ( Request::is('admin/laravel_charts') || Request::is('admin/database_charts') ? 'class="active"' : '' ) !!}>
-        <a href="#">
-            <i class="livicon" data-name="link" data-size="18" data-c="#ef6f6c" data-hc="#ef6f6c" data-loop="true"></i>
-            <span class="title">Backlink Management</span>
-            <span class="fa arrow"></span>
-        </a>
-        <ul class="sub-menu">
-            <li {!! (Request::is('admin/laravel_charts') ? 'class="active"' : '' ) !!}>
-                <a href="{{ URL::to('admin/laravel_charts') }}">
-                    <i class="fa fa-angle-double-right"></i>
-                    Backlink Analytics
-                </a>
-            </li>
-            <li {!! (Request::is('admin/database_charts') ? 'class="active"' : '' ) !!}>
-                <a href="{{ URL::to('admin/database_charts') }}">
-                    <i class="fa fa-angle-double-right"></i>
-                    Backlink Audit
-                </a>
-            </li>
-            <li {!! (Request::is('admin/database_charts') ? 'class="active"' : '' ) !!}>
-                <a href="{{ URL::to('admin/database_charts') }}">
-                    <i class="fa fa-angle-double-right"></i>
-                   Link Building Tool
-                </a>
-            </li>
-        </ul>
-    </li> -->
+   
 
     <li {!! (Request::is('user/content_generation') ? 'class="active"' : '' ) !!}>
         <a href="{{  URL::to('user/content_generation') }}">
@@ -643,75 +433,37 @@
     </li>
     @endif
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-    
-    
-    <!--<li {!! ( Request::is('admin/laravel_charts') || Request::is('admin/database_charts') ? 'class="active"' : '' ) !!}>-->
-    <!--    <a href="#">-->
-    <!--        <i class="livicon" data-name="barchart" data-size="18" data-c="#418BCA" data-hc="#418BCA" data-loop="true"></i>-->
-    <!--        <span class="title">Reports</span>-->
-    <!--        <span class="fa arrow"></span>-->
-    <!--    </a>-->
-    <!--    <ul class="sub-menu">-->
-    <!--        <li {!! (Request::is('admin/my_domains') ? 'class="active"' : '' ) !!}>-->
-    <!--            <a href="{{ URL::to('admin/my_domains') }}">-->
-    <!--                <i class="fa fa-angle-double-right"></i>-->
-    <!--                Custom Reports-->
-    <!--            </a>-->
-    <!--        </li>-->
-            <!--<li {!! (Request::is('admin/laravel_charts') ? 'class="active"' : '' ) !!}>-->
-            <!--    <a href="{{ URL::to('admin/laravel_charts') }}">-->
-            <!--        <i class="fa fa-angle-double-right"></i>-->
-            <!--        Custom Reports-->
-            <!--    </a>-->
-            <!--</li>-->
-            <!--<li {!! (Request::is('admin/database_charts') ? 'class="active"' : '' ) !!}>-->
-            <!--    <a href="{{ URL::to('admin/database_charts') }}">-->
-            <!--        <i class="fa fa-angle-double-right"></i>-->
-            <!--        Usage Report-->
-            <!--    </a>-->
-            <!--</li>-->
-    <!--    </ul>-->
-    <!--</li>-->
     
 
     
-    <li {!! (Request::is('admin/activity_log') ? 'class="active"' : '' ) !!}>
-        @if(Sentinel::check())
-        <a href="{{ URL::route('admin.users.show',Sentinel::getUser()->id) }}">
+    <li class="{{ request()->routeIs('users.show') ? 'active' : '' }}">
+    @auth
+        <a href="{{ route('users.show', auth()->id()) }}">
             <i class="livicon" data-name="user" data-size="18" data-c="#F89A14" data-hc="#F89A14" data-loop="true"></i>
             My Profile
         </a>
-        @endif
+    @endauth
     </li>
-    @if(Sentinel::check())
 
-    <li {!! (Request::is('admin/activity_log') ? 'class="active"' : '' ) !!}>
-        <a href="{{ route('admin.users.edit', Sentinel::getUser()->id) }}">
-            <i class="livicon" data-name="gears" data-size="18" data-c="#F89A14" data-hc="#F89A14" data-loop="true"></i>
-             Account Settings
-        </a>
-    </li>
-    @endif
-    <li {!! (Request::is('admin/activity_log') ? 'class="active"' : '' ) !!}>
-        <a href="{{ URL::to('admin/logout') }}">
-            <i class="livicon" data-name="sign-out" data-size="18" data-c="#F89A14" data-hc="#F89A14" data-loop="true"></i>
-             Logout
-        </a>
-    </li>
-    <!-- Menus generated by CRUD generator -->
-    @include('layouts/menu')
+    @auth
+        <li {!! (Request::is('admin/activity_log') ? 'class="active"' : '' ) !!}>
+            <a href="{{ route('users.edit', auth()->id()) }}">
+                <i class="livicon" data-name="gears" data-size="18" data-c="#F89A14" data-hc="#F89A14" data-loop="true"></i>
+                Account Settings
+            </a>
+        </li>
+
+        <li>
+            <form method="POST" action="{{ route('logout') }}" id="logout-form">
+                @csrf
+                <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                    <i class="livicon" data-name="sign-out" data-size="18" data-c="#F89A14" data-hc="#F89A14" data-loop="true"></i>
+                    Logout
+                </a>
+            </form>
+        </li>
+
+        <!-- Menus generated by CRUD generator -->
+        @include('layouts/menu')
+    @endauth
 </ul>

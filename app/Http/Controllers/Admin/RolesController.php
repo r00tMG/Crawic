@@ -2,109 +2,150 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\JoshController;
-use App\Http\Requests\RoleRequest;
+use Illuminate\Http\Request;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
+use App\Http\Controllers\Controller;
 use Redirect;
-use Sentinel;
-use Str;
 use View;
 
-class RolesController extends JoshController
+class RolesController extends Controller
 {
     /**
-     * Show a list of all the roles.
+     * Display a listing of roles
      *
-     * @return View
+     * @return \Illuminate\View\View
      */
     public function index()
     {
-        // Grab all the roles
-        $roles = Sentinel::getRoleRepository()->all();
-
-        // Show the page
+        $roles = Role::with('permissions')->get();
         return view('admin.roles.index', compact('roles'));
     }
 
     /**
-     * Role create.
+     * Show the form for creating a new role
      *
-     * @return View
+     * @return \Illuminate\View\View
      */
     public function create()
     {
-        // Show the page
-        return view('admin.roles.create');
+        $permissions = Permission::all();
+        return view('admin.roles.create', compact('permissions'));
     }
 
     /**
-     * Role create form processing.
+     * Store a newly created role
      *
-     * @param RoleRequest $request
-     *
-     * @return void
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(RoleRequest $request)
+    public function store(Request $request)
     {
-        if ($role = Sentinel::getRoleRepository()->createModel()->create(
-            [
-                'name' => $request->get('name'),
-                'slug' => Str::slug($request->get('name')),
-            ]
-        )
-        ) {
-            // Redirect to the new role page
-            return Redirect::route('admin.roles.index')->with('success', trans('roles/message.success.create'));
-        }
+        $this->validate($request, [
+            'name' => 'required|unique:roles,name',
+            'permissions' => 'array'
+        ]);
 
-        // Redirect to the role create page
-        return Redirect::route('admin.roles.create')->withInput()->with('error', trans('roles/message.error.create'));
+        try {
+            $role = Role::create([
+                'name' => $request->name,
+                'guard_name' => 'web'
+            ]);
+
+            if ($request->has('permissions')) {
+                $role->syncPermissions($request->permissions);
+            }
+
+            return redirect()
+                ->route('roles.index')
+                ->with('success', 'Role créé avec succès.');
+
+        } catch (\Exception $e) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Erreur lors de la création du rôle.');
+        }
     }
 
     /**
-     * Role update.
+     * Show the form for editing the specified role
      *
-     * @param int $role
-     *
-     * @return View
+     * @param Role $role
+     * @return \Illuminate\View\View
      */
-    public function edit($role)
+    public function edit(Role $role)
+    {
+        $permissions = Permission::all();
+        $rolePermissions = $role->permissions->pluck('name')->toArray();
+
+        return view('admin.roles.edit', compact('role', 'permissions', 'rolePermissions'));
+    }
+
+    /**
+     * Update the specified role
+     *
+     * @param Request $request
+     * @param Role $role
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function update(Request $request, Role $role)
+    {
+        $this->validate($request, [
+            'name' => 'required|unique:roles,name,' . $role->id,
+            'permissions' => 'array'
+        ]);
+
+        try {
+            $role->update([
+                'name' => $request->name
+            ]);
+
+            $role->syncPermissions($request->permissions ?? []);
+
+            return redirect()
+                ->route('roles.index')
+                ->with('success', 'Role mis à jour avec succès.');
+
+        } catch (\Exception $e) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Erreur lors de la mise à jour du rôle.');
+        }
+    }
+
+    /**
+     * Remove the specified role
+     *
+     * @param Role $role
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function destroy(Role $role)
     {
         try {
-            // Get the role information
-            $role = Sentinel::findRoleById($role);
-        } catch (RoleNotFoundException $e) {
-            // Redirect to the roles management page
-            return Redirect::route('admin.roles')->with('error', trans('roles/message.role_not_found', compact('id')));
-        }
+            $role->delete();
 
-        // Show the page
-        return view('admin.roles.edit', compact('role'));
+            return redirect()
+                ->route('roles.index')
+                ->with('success', 'Role supprimé avec succès.');
+
+        } catch (\Exception $e) {
+            return redirect()
+                ->back()
+                ->with('error', 'Erreur lors de la suppression du rôle.');
+        }
     }
 
     /**
-     * Role update form processing page.
+     * Show the specified role
      *
-     * @param int
-     * @param RoleRequest $request
-     *
-     * @return Redirect
+     * @param Role $role
+     * @return \Illuminate\View\View
      */
-    public function update($role, RoleRequest $request)
+    public function show(Role $role)
     {
-        $role = Sentinel::findRoleById($role);
-
-        // Update the role data
-        $role->name = $request->get('name');
-
-        // Was the role updated?
-        if ($role->save()) {
-            // Redirect to the role page
-            return Redirect::route('admin.roles.index')->with('success', trans('roles/message.success.update'));
-        }
-            // Redirect to the role page
-        return Redirect::route('admin.roles.edit', $role)->with('error', trans('roles/message.error.update'));
-
-    
+        return view('admin.roles.show', compact('role'));
     }
 
     /**
@@ -120,36 +161,12 @@ class RolesController extends JoshController
         $confirm_route = $error = null;
         try {
             // Get role information
-            $role = Sentinel::findRoleById($id);
+            $role = Role::find($id);
             $confirm_route = route('admin.roles.delete', ['id' => $role->id]);
             return view('admin.layouts.modal_confirmation', compact('error', 'model', 'confirm_route'));
-        } catch (RoleNotFoundException $e) {
+        } catch (\Exception $e) {
             $error = trans('admin/roles/message.role_not_found', compact('id'));
             return view('admin.layouts.modal_confirmation', compact('error', 'model', 'confirm_route'));
-        }
-    }
-
-    /**
-     * Delete the given role.
-     *
-     * @param int $id
-     *
-     * @return Redirect
-     */
-    public function destroy($id)
-    {
-        try {
-            // Get role information
-            $role = Sentinel::findRoleById($id);
-
-            // Delete the role
-            $role->delete();
-
-            // Redirect to the role management page
-            return Redirect::route('admin.roles.index')->with('success', trans('roles/message.success.delete'));
-        } catch (RoleNotFoundException $e) {
-            // Redirect to the role management page
-            return Redirect::route('admin.roles.index')->with('error', trans('roles/message.role_not_found', compact('id')));
         }
     }
 }

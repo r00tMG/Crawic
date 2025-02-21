@@ -2,20 +2,24 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Auth;
+use Spatie\Activitylog\Models\Activity;
+use App\Models\User;
+use Spatie\Permission\Models\Role;
+use ConsoleTVs\Charts\Facades\Charts;
 use Analytics;
 use App\Charts\Highcharts;
 use App\Models\Blog;
-use App\Models\User;
 use Artisan;
 use Carbon\Carbon;
 use File;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\MessageBag;
 use Sentinel;
-use Spatie\Activitylog\Models\Activity;
 use Spatie\Analytics\Period;
 use Str;
-use View;
 use Yajra\DataTables\DataTables;
 
 class JoshController extends Controller
@@ -33,6 +37,9 @@ class JoshController extends Controller
     public function __construct()
     {
         $this->messageBag = new MessageBag();
+        $this->middleware('auth');
+        $this->middleware('permission:view dashboard')->only('showHome');
+        $this->middleware('permission:view activity log')->only('activityLogData');
     }
 
     /**
@@ -60,28 +67,36 @@ class JoshController extends Controller
 
     public function showView($name = null)
     {
-        if (View::exists('admin/' . $name)) {
-            if (Sentinel::check()) {
-                return view('admin.' . $name);
-            }
-            return redirect('admin/signin')->with('error', 'You must be logged in!');
-
-        
+        if (!Auth::check()) {
+            return redirect('login')->with('error', 'You must be logged in!');
         }
-        abort('404');
 
-    
+        if (View::exists('admin.' . $name)) {
+            return view('admin.' . $name);
+        }
+
+        abort(404);
     }
 
     public function activityLogData()
     {
-        $logs = Activity::get(['causer_id', 'log_name', 'description', 'created_at']);
-        return DataTables::of($logs)
-            ->make(true);
+        if (!Auth::check()) {
+            return redirect('login')->with('error', 'You must be logged in!');
+        }
+
+        $logs = Activity::with('causer')
+            ->latest()
+            ->get(['causer_id', 'log_name', 'description', 'created_at']);
+
+        return response()->json($logs);
     }
 
     public function showHome()
     {
+        if (!Auth::check()) {
+            return redirect('login')->with('error', 'You must be logged in!');
+        }
+
         // analytics related functionality
         $storagePath = storage_path() . '/app/analytics/';
         if (File::exists($storagePath . 'service-account-credentials.json')) {
@@ -184,7 +199,7 @@ class JoshController extends Controller
         );
 
         // user roles
-        $roles = Sentinel::getRoleRepository()->all();
+        $roles = Role::all();
         $rolesCount = collect();
         foreach ($roles as $role) {
             $rolesCount->put($role->name, $role->users()->count());
@@ -203,9 +218,8 @@ class JoshController extends Controller
             return view('admin.index1', compact('analytics_error', 'users_chart', 'blog_count', 'user_count', 'users', 'blogs', 'visitors', 'pageVisits', 'month_visits', 'year_visits', 'user_roles', 'userTypes'));
         }
         return redirect('admin/signin')->with('error', 'You must be logged in!');
-
-    
     }
+
     /**
      * CRUD BUILDER
      * Check for folder permissions and return view
@@ -248,5 +262,35 @@ class JoshController extends Controller
             return false;
         }
         return true;
+    }
+
+    public function cropPicture(Request $request)
+    {
+        $targ_w = $targ_h = 150;
+        $jpeg_quality = 90;
+
+        $src = $request->input('imgUrl');
+        
+        if ($request->hasFile('image')) {
+            $img_r = imagecreatefromjpeg($src);
+            $dst_r = imagecreatetruecolor($targ_w, $targ_h);
+
+            imagecopyresampled(
+                $dst_r, 
+                $img_r, 
+                0, 
+                0, 
+                intval($request->input('x')), 
+                intval($request->input('y')), 
+                $targ_w, 
+                $targ_h, 
+                intval($request->input('w')), 
+                intval($request->input('h'))
+            );
+
+            header('Content-type: image/jpeg');
+            imagejpeg($dst_r, null, $jpeg_quality);
+            exit;
+        }
     }
 }

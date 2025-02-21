@@ -108,7 +108,7 @@ Users List
                             <th>Domain</th>
                             <th>DA</th>
                             <th>PA</th>
-                            <!-- <th>DR</th> -->
+                            <!-- <th>DR</th>  -->
                             <th>CF</th>
                             <th>TF</th>
                             <th>Spam Rating</th>

@@ -30,7 +30,7 @@ $(document).ready(function() {
             },
         },
     });
-    $('#register_here').bootstrapValidator({
+    /* $('#register_here').bootstrapValidator({
         fields: {
             first_name: {
                 validators: {
@@ -99,8 +99,8 @@ $(document).ready(function() {
                 },
             },
         },
-    });
-    $('#reset_pw').bootstrapValidator({
+    }); */
+   /*  $('#reset_pw').bootstrapValidator({
         fields: {
             email: {
                 validators: {
@@ -113,10 +113,10 @@ $(document).ready(function() {
                 },
             },
         },
-    });
+    }); */
 });
 
-$('#register_here input').on('keyup', function() {
+/* $('#register_here input').on('keyup', function() {
     $('#register_here input').each(function() {
         var pswd = $("#register_here input[name='password']").val();
         var pswd_cnf = $("#register_here input[name='password_confirm']").val();
@@ -131,4 +131,4 @@ $('#register_here input').on('keyup', function() {
             $('#register_here').bootstrapValidator('revalidateField', 'email_confirm');
         }
     });
-});
+}); */

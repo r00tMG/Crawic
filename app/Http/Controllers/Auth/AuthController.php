@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
@@ -10,17 +10,18 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    public function getSignin()
+    public function showLoginForm()
     {
         return view('auth.login');
     }
 
-    public function postSignin(Request $request)
+    public function login(Request $request)
     {
         $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
         ]);
+        
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
@@ -32,12 +33,12 @@ class AuthController extends Controller
         ])->onlyInput('email');
     }
 
-    public function getSignup()
+    public function showRegistrationForm()
     {
         return view('auth.register');
     }
 
-    public function postSignup(Request $request)
+    public function register(Request $request)
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -50,6 +51,7 @@ class AuthController extends Controller
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
         ]);
+        $user->assignRole('user');
 
         Auth::login($user);
 

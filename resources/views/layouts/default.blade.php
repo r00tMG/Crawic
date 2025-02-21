@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
     <meta charset="UTF-8">
@@ -9,7 +9,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>
         @section('title')
-            | Seo
+            | Admin
         @show
     </title>
 
@@ -23,8 +23,8 @@
 
 <body class="skin-josh">
 <header class="header">
-    <a href="{{ url('dashboard') }}" class="logo">
-        <img src="{{ asset('images/dologo.png') }}" alt="logo"  style="width: 110px;">
+    <a href="{{ route('admin.dashboard') }}" class="logo">
+        <img src="{{ asset('img/logo.png') }}" alt="logo">
     </a>
     <nav class="navbar navbar-static-top" role="navigation">
         <!-- Sidebar toggle button-->
@@ -37,92 +37,39 @@
             <ul class="nav navbar-nav  list-inline">
                 <!-- include('layouts._messages') -->
                 <!-- include('layouts._notifications') -->
-                <li class=" nav-item dropdown user user-menu">
-                    <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown">
-                        <?php /*
-                        @if(getUser()->pic)
-                            <img src="{{ Sentinel::getUser()->pic }}" alt="img" height="35px" width="35px"
-                                 class="rounded-circle img-fluid float-left"/>
-
-                        @elseif(getUser()->gender === "male")
-                            <img src="{{ asset('images/authors/avatar3.png') }}" alt="img" height="35px" width="35px"
-                                 class="rounded-circle img-fluid float-left"/>
-
-                        @elseif(getUser()->gender === "female")
-                            <img src="{{ asset('images/authors/avatar5.png') }}" alt="img" height="35px" width="35px"
-                                 class="rounded-circle img-fluid float-left"/>
-
-                        @else
-                            <img src="{{ asset('images/authors/no_avatar.jpg') }}" alt="img" height="35px" width="35px"
-                                 class="rounded-circle img-fluid float-left"/>
-                        @endif  */
-                        ?>
-                        <div class="riot">
-                            <div>
-                                <p class="user_name_max">{{ auth()->user()->first_name ?? '' }}</p>
-                                <span>
-                                        <i class="caret"></i>
-                                    </span>
-                            </div>
-                        </div>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <!-- User image -->
-                        <li class="user-header bg-light-blue">
-                            <?php /* @if(Sentinel::getUser()->pic)
-                                <img src="{  Sentinel::getUser()->pic }}" alt="img" height="35px" width="35px"
-                                     class="rounded-circle img-fluid float-left"/>
-
-                            @elseif({gender === "male")
-                                <img src="{{ asset('images/authors/avatar3.png') }}" alt="img" height="35px" width="35px"
-                                     class="rounded-circle img-fluid float-left"/>
-
-                            @elseif(Sentinel::getUser()->gender === "female")
-                                <img src="{{ asset('images/authors/avatar5.png') }}" alt="img" height="35px" width="35px"
-                                     class="rounded-circle img-fluid float-left"/>
+                @auth
+                    <li class=" nav-item dropdown user user-menu">
+                        <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown">
+                            @if(auth()->user()->pic)
+                                <img src="{{ asset('uploads/users/'.auth()->user()->pic) }}" alt="User Image" class="img-circle user-image" width="30" height="30"/>
                             @else
-                                <img src="{{ asset('images/authors/no_avatar.jpg') }}" alt="img" height="35px" width="35px"
-                                     class="rounded-circle img-fluid float-left"/>
-                            @endif */ ?>
-                            <p class="topprofiletext">{{ auth()->user()->first_name ?? '' }}</p>
-                        </li>
-                        <!-- Menu Body -->
-                        <li>
-                            <a href="{{ URL::route('admin.users.show',1) }}">
-                                <i class="livicon" data-name="user" data-s="18"></i>
-                                My Profile
-                            </a>
-                        </li>
-                        <li role="presentation"></li>
-                        <li>
-                            <a href="{{ route('admin.users.edit', 1) }}">
-                                <i class="livicon" data-name="gears" data-s="18"></i>
-                                Account Settings
-                            </a>
-                        </li>
-                        <!-- Menu Footer-->
-                        <li class="user-footer">
-                            <div class="float-left">
-                                <a href="{{ URL::route('lockscreen',1) }}">
-                                    <i class="livicon" data-name="lock" data-size="16" data-c="#555555" data-hc="#555555" data-loop="true"></i>
-                                    Lock
+                                <img src="{{ asset('img/authors/avatar3.png') }}" alt="User Image" class="img-circle user-image" width="30" height="30"/>
+                            @endif
+                            <span class="hidden-xs">{{ auth()->user()->first_name }} {{ auth()->user()->last_name }}</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a href="{{ route('users.show', auth()->id()) }}">
+                                    <i class="fa fa-user"></i> My Profile
                                 </a>
-                            </div>
-                            <div class="float-right">
-                                
-                                <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-<i class="livicon" data-name="sign-out" data-s="18"></i>
-                            <x-dropdown-link :href="route('logout')"
-                                    onclick="event.preventDefault();
-                                                this.closest('form').submit();">
-                                {{ __('Log Out') }}
-                            </x-dropdown-link>
-                        </form>
-                            </div>
-                        </li>
-                    </ul>
-                </li>
+                            </li>
+                            <li>
+                                <a href="{{ route('users.edit', auth()->id()) }}">
+                                    <i class="fa fa-gear"></i> Settings
+                                </a>
+                            </li>
+                            <li class="divider"></li>
+                            <li>
+                                <form method="POST" action="{{ route('logout') }}" id="logout-form">
+                                    @csrf
+                                    <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                        <i class="fa fa-sign-out"></i> Logout
+                                    </a>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                @endauth
             </ul>
         </div>
 

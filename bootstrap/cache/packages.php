@@ -1,17 +1,4 @@
 <?php return array (
-  'cartalyst/sentinel' => 
-  array (
-    'providers' => 
-    array (
-      0 => 'Cartalyst\\Sentinel\\Laravel\\SentinelServiceProvider',
-    ),
-    'aliases' => 
-    array (
-      'Activation' => 'Cartalyst\\Sentinel\\Laravel\\Facades\\Activation',
-      'Reminder' => 'Cartalyst\\Sentinel\\Laravel\\Facades\\Reminder',
-      'Sentinel' => 'Cartalyst\\Sentinel\\Laravel\\Facades\\Sentinel',
-    ),
-  ),
   'consoletvs/charts' => 
   array (
     'providers' => 
@@ -103,24 +90,31 @@
   ),
   'spatie/laravel-html' => 
   array (
-    'providers' => 
-    array (
-      0 => 'Spatie\\Html\\HtmlServiceProvider',
-    ),
     'aliases' => 
     array (
       'Html' => 'Spatie\\Html\\Facades\\Html',
     ),
+    'providers' => 
+    array (
+      0 => 'Spatie\\Html\\HtmlServiceProvider',
+    ),
   ),
   'spatie/laravel-ignition' => 
   array (
+    'aliases' => 
+    array (
+      'Flare' => 'Spatie\\LaravelIgnition\\Facades\\Flare',
+    ),
     'providers' => 
     array (
       0 => 'Spatie\\LaravelIgnition\\IgnitionServiceProvider',
     ),
-    'aliases' => 
+  ),
+  'spatie/laravel-permission' => 
+  array (
+    'providers' => 
     array (
-      'Flare' => 'Spatie\\LaravelIgnition\\Facades\\Flare',
+      0 => 'Spatie\\Permission\\PermissionServiceProvider',
     ),
   ),
   'yajra/laravel-datatables-buttons' => 
@@ -153,13 +147,13 @@
   ),
   'yajra/laravel-datatables-oracle' => 
   array (
-    'providers' => 
-    array (
-      0 => 'Yajra\\DataTables\\DataTablesServiceProvider',
-    ),
     'aliases' => 
     array (
       'DataTables' => 'Yajra\\DataTables\\Facades\\DataTables',
+    ),
+    'providers' => 
+    array (
+      0 => 'Yajra\\DataTables\\DataTablesServiceProvider',
     ),
   ),
 );

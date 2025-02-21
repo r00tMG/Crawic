@@ -177,6 +177,13 @@ p.signin.button {
 #login {
     z-index: 22;
 }
+/* Styles spécifiques pour la page d'inscription */
+.register-page #register {
+    position: relative !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
 
 #toregister:target ~ #wrapper #register,
 #tologin:target ~ #wrapper #login,

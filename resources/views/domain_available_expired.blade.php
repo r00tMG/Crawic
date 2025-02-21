@@ -35,174 +35,194 @@ Users List
         <div class="col-12">
             <div class="card ">
                 <div class="card-header bg-primary text-white">
-                <h4 class="card-title my-2 float-left"> <i class="livicon" data-name="user" data-size="16" data-loop="true" data-c="#fff" data-hc="white"></i>
-                    Domains Expired List 
-                </h4>
-            </div>
-            <div class="card-body">
-            <div class="table-responsive-lg table-responsive-sm table-responsive-md">
-                               
-                <form method="GET" action="" class="mb-4">
-                    <div class="row">
-                        <!-- TLD Filter -->
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label>TLD</label>
-                                <select name="tld" class="form-control">
-                                    <option value="">Tous</option>
-                                    <option value="com" {{ request('tld') == 'com' ? 'selected' : '' }}>.com</option>
-                                    <option value="net" {{ request('tld') == 'net' ? 'selected' : '' }}>.net</option>
-                                    <option value="org" {{ request('tld') == 'org' ? 'selected' : '' }}>.org</option>
-                                    <option value="info" {{ request('tld') == 'info' ? 'selected' : '' }}>.info</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- Filter Type -->
-                        <div class="col-md-2">
-                            <div class="form-group">
-                                <label>Type filter</label>
-                                <select name="filter_type" class="form-control">
-                                    <option value="">Aucun</option>
-                                    <option value="starts" {{ request('filter_type') == 'starts' ? 'selected' : '' }}>Starts with</option>
-                                    <option value="contains" {{ request('filter_type') == 'contains' ? 'selected' : '' }}>Contains</option>
-                                    <option value="ends" {{ request('filter_type') == 'ends' ? 'selected' : '' }}>Ends with</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- Filter Value -->
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label>Value filter</label>
-                                <input type="text" name="filter_value" class="form-control" value="{{ request('filter_value') }}">
-                            </div>
-                        </div>
-
-                        <!-- Category Filter -->
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label>Category:</label>
-                                <select name="category" class="form-control">
-                                    <option value="">Select Your Categories</option>
-                                    @foreach($categories as $category)
-                                        <option value="{{ $category->id }}" 
-                                            {{ request('category') == $category->id ? 'selected' : '' }}>
-                                            {{ $category->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Buttons -->
-                    <div class="row d-flex justify-content-between px-3">
-                        <button type="submit" class="btn btn-primary">Filter</button>
-                        <a href="{{ url()->current() }}" class="btn btn-secondary">Reset</a>
-                    </div>
-                </form>
-
-                <table class="table table-bordered table-striped table-responsive width100" id="table">
-                    <thead>
-                        <tr class="filters" id="table">
-                        <th>ID</th>
-                            <th>Domain</th>
-                            <th>DA</th>
-                            <th>PA</th>
-                            <!-- <th>DR</th> -->
-                            <th>CF</th>
-                            <th>TF</th>
-                            <th>Spam Rating</th>
-                            <th>Total Backlinks</th>
-                            <th>Referring Domains</th>
-                            <th>External Links</th>
-                            <th>Internal Links</th>
-                            <th>Created At</th>
-                            <th>Dropped</th>
-                            <th>Domain Age</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if(!$expired_domains->isEmpty())
-                            @forelse($expired_domains as $expired_domain)
-                                <tr>
-                                    <td>{{ $expired_domain->id }}</td>
-                                    <td>{{ $expired_domain->domain_name }}</td>
-                                    <td>{{ $expired_domain->DA === -1 ? 'Loading...' : $expired_domain->DA }}</td>
-                                    <td>{{ $expired_domain->PA === -1 ? 'Loading...' : $expired_domain->PA }}</td>
-                                    <!-- <td>{{ $expired_domain->DR === -1 ? 'Loading...' : $expired_domain->DR }}</td> -->
-                                    <td>{{ $expired_domain->CF === -1 ? 'Loading...' : $expired_domain->CF }}</td>
-                                    <td>{{ $expired_domain->TF === -1 ? 'Loading...' : $expired_domain->TF }}</td>
-                                    <td>{{ $expired_domain->spam_rating === -1 ? 'Loading...' : $expired_domain->spam_rating }}</td>
-                                    <td>{{ $expired_domain->total_backlinks }}</td>
-                                    <td>{{ $expired_domain->referring_domains === -1 ? 'Loading...' : $expired_domain->referring_domains }}</td>
-                                    <td>{{ $expired_domain->external_links === -1 ? 'Loading...' : $expired_domain->external_links }}</td>
-                                    <td>{{ $expired_domain->internal_links === -1 ? 'Loading...' : $expired_domain->internal_links }}</td>
-                                    <td>{{ $expired_domain->add_date }}</td>
-                                    <td>{{ $expired_domain->end_date }}</td>
-                                    <td>{{ $expired_domain->domain_age }}</td>
-                                    <td>{{ $expired_domain->status }}</td>
-                                    <td>
-                                        <button type="button" 
-                                                class="btn btn-info btn-sm show-details" 
-                                                data-domain-id="{{ $expired_domain->id }}">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-fill text-white" viewBox="0 0 16 16">
-                                                    <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0"/>
-                                                    <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8m8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7"/>
-                                                </svg>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr id="details-{{ $expired_domain->id }}" style="display: none;">
-                                    <td colspan="17">
-                                        <div class="domain-details">
-                                            <h3>Detailed information for {{ $expired_domain->domain_name }}</h5>
-                                            <div class="row">
-                                                <div class="col-md-4">
-                                                    <p><strong>Crawl Results:</strong> {{ $expired_domain->crawl_results }}</p>
-                                                    <p><strong>Global Rank:</strong> {{ $expired_domain->global_rank }}</p>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <p><strong>TLD Registered:</strong> {{ $expired_domain->tld_registered }}</p>
-                                                    <p><strong>Length:</strong> {{ $expired_domain->length }}</p>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <p><strong>Available TLDs:</strong></p>
-                                                    <ul>
-                                                        <li>.com: {{ $expired_domain->com_tld }}</li>
-                                                        <li>.net: {{ $expired_domain->net_tld }}</li>
-                                                        <li>.org: {{ $expired_domain->org_tld }}</li>
-                                                    </ul>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <p><strong>Categories:</strong></p>
-                                                    <ul>
-                                                        @foreach($expired_domain->categories as $category)
-                                                            <li>{{ $category->name }}</li>
-                                                        @endforeach
-                                                    </ul>
-                                                </div>
-                                               
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="3">No expired domains found</td>
-                                </tr>
-                            @endforelse
-                        @endif
-                    </tbody>
-                </table>
-                <!-- Liens de pagination -->
-                <div class="d-flex justify-content-center">
-                    {{ $expired_domains->links() }}
+                    <h4 class="card-title my-2 float-left">
+                        <i class="livicon" data-name="user" data-size="16" data-loop="true" data-c="#fff" data-hc="white"></i>
+                        Domains Expired List 
+                    </h4>
+            
                 </div>
-                
+                <div class="card-body">
+                <div class="table-responsive-lg table-responsive-sm table-responsive-md">
+                                   
+                    <form method="GET" action="" class="mb-4">
+                        <div class="row">
+                            <!-- TLD Filter -->
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>TLD</label>
+                                    <select name="tld" class="form-control">
+                                        <option value="">Tous</option>
+                                        <option value="com" {{ request('tld') == 'com' ? 'selected' : '' }}>.com</option>
+                                        <option value="net" {{ request('tld') == 'net' ? 'selected' : '' }}>.net</option>
+                                        <option value="org" {{ request('tld') == 'org' ? 'selected' : '' }}>.org</option>
+                                        <option value="info" {{ request('tld') == 'info' ? 'selected' : '' }}>.info</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Filter Type -->
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Type filter</label>
+                                    <select name="filter_type" class="form-control">
+                                        <option value="">Aucun</option>
+                                        <option value="starts" {{ request('filter_type') == 'starts' ? 'selected' : '' }}>Starts with</option>
+                                        <option value="contains" {{ request('filter_type') == 'contains' ? 'selected' : '' }}>Contains</option>
+                                        <option value="ends" {{ request('filter_type') == 'ends' ? 'selected' : '' }}>Ends with</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Filter Value -->
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Value filter</label>
+                                    <input type="text" name="filter_value" class="form-control" value="{{ request('filter_value') }}">
+                                </div>
+                            </div>
+
+                            <!-- Category Filter -->
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Category:</label>
+                                    <select name="category" class="form-control">
+                                        <option value="">Select Your Categories</option>
+                                        @foreach($categories as $category)
+                                            <option value="{{ $category->id }}" 
+                                                {{ request('category') == $category->id ? 'selected' : '' }}>
+                                                {{ $category->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="row d-flex justify-content-between px-3">
+                            <button type="submit" class="btn btn-primary">Filter</button>
+                            <a href="{{ url()->current() }}" class="btn btn-secondary">Reset</a>
+                        </div>
+                    </form>
+                    <!-- Ajout du bouton d'import CSV -->
+                    <div class="float-right my-1">
+                        <form action="{{ route('admin.domains.import') }}" method="POST" enctype="multipart/form-data" class="d-inline">
+                            @csrf
+                            <div class="input-group">
+                                <div class="custom-file">
+                                    <input type="file" class="custom-file-input" id="csvFile" name="csv_file" accept=".csv">
+                                    <label class="custom-file-label text-dark" for="csvFile">Choisir un fichier CSV</label>
+                                </div>
+                                <div class="input-group-append">
+                                    <button class="btn btn-success" type="submit">Importer</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <table class="table table-bordered table-striped table-responsive width100" id="table">
+                        <thead>
+                            <tr class="filters" id="table">
+                            <th>ID</th>
+                                <th>Domain</th>
+                                <th>DA</th>
+                                <th>PA</th>
+                                <!-- <th>DR</th> -->
+                                <th>CF</th>
+                                <th>TF</th>
+                                <th>Spam Rating</th>
+                                <th>Total Backlinks</th>
+                                <th>Referring Domains</th>
+                                <th>External Links</th>
+                                <th>Internal Links</th>
+                                <th>Created At</th>
+                                <th>Dropped</th>
+                                <th>Domain Age</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if(!$expired_domains->isEmpty())
+                                @forelse($expired_domains as $expired_domain)
+                                    <tr>
+                                        <td>{{ $expired_domain->id }}</td>
+                                        <td>{{ $expired_domain->domain_name }}</td>
+                                        <td>{{ $expired_domain->DA === -1 ? 'Loading...' : $expired_domain->DA }}</td>
+                                        <td>{{ $expired_domain->PA === -1 ? 'Loading...' : $expired_domain->PA }}</td>
+                                        <!-- <td>{{ $expired_domain->DR === -1 ? 'Loading...' : $expired_domain->DR }}</td> -->
+                                        <td>{{ $expired_domain->CF === -1 ? 'Loading...' : $expired_domain->CF }}</td>
+                                        <td>{{ $expired_domain->TF === -1 ? 'Loading...' : $expired_domain->TF }}</td>
+                                        <td>{{ $expired_domain->spam_rating === -1 ? 'Loading...' : $expired_domain->spam_rating }}</td>
+                                        <td>{{ $expired_domain->total_backlinks }}</td>
+                                        <td>{{ $expired_domain->referring_domains === -1 ? 'Loading...' : $expired_domain->referring_domains }}</td>
+                                        <td>{{ $expired_domain->external_links === -1 ? 'Loading...' : $expired_domain->external_links }}</td>
+                                        <td>{{ $expired_domain->internal_links === -1 ? 'Loading...' : $expired_domain->internal_links }}</td>
+                                        <td>{{ $expired_domain->add_date }}</td>
+                                        <td>{{ $expired_domain->end_date }}</td>
+                                        <td>{{ $expired_domain->domain_age }}</td>
+                                        <td>{{ $expired_domain->status }}</td>
+                                        <td>
+                                            <button type="button" 
+                                                    class="btn btn-info btn-sm show-details" 
+                                                    data-domain-id="{{ $expired_domain->id }}">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-fill text-white" viewBox="0 0 16 16">
+                                                        <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0"/>
+                                                        <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8m8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7"/>
+                                                    </svg>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr id="details-{{ $expired_domain->id }}" style="display: none;">
+                                        <td colspan="17">
+                                            <div class="domain-details">
+                                                <h3>Detailed information for {{ $expired_domain->domain_name }}</h5>
+                                                <div class="row">
+                                                    <div class="col-md-4">
+                                                        <p><strong>Crawl Results:</strong> {{ $expired_domain->crawl_results }}</p>
+                                                        <p><strong>Global Rank:</strong> {{ $expired_domain->global_rank }}</p>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <p><strong>TLD Registered:</strong> {{ $expired_domain->tld_registered }}</p>
+                                                        <p><strong>Length:</strong> {{ $expired_domain->length }}</p>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <p><strong>Available TLDs:</strong></p>
+                                                        <ul>
+                                                            <li>.com: {{ $expired_domain->com_tld }}</li>
+                                                            <li>.net: {{ $expired_domain->net_tld }}</li>
+                                                            <li>.org: {{ $expired_domain->org_tld }}</li>
+                                                        </ul>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <p><strong>Categories:</strong></p>
+                                                        <ul>
+                                                            @foreach($expired_domain->categories as $category)
+                                                                <li>{{ $category->name }}</li>
+                                                            @endforeach
+                                                        </ul>
+                                                    </div>
+                                                   
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="3">No expired domains found</td>
+                                    </tr>
+                                @endforelse
+                            @endif
+                        </tbody>
+                    </table>
+                    <!-- Liens de pagination -->
+                    <div class="d-flex justify-content-center">
+                        {{ $expired_domains->links() }}
+                    </div>
+                    
+                </div>
+            </div>
+            
+            
             </div>
         </div>
         
@@ -288,4 +308,14 @@ $('#delete_confirm').on('show.bs.modal', function (event) {
     modal.find('.modal-footer a').prop("href",$url_path+"/admin/users/"+$recipient+"/delete");
 })
 </script>
+
+<script>
+// Ajout du script pour afficher le nom du fichier sélectionné
+document.querySelector('.custom-file-input').addEventListener('change', function(e) {
+    var fileName = e.target.files[0].name;
+    var label = e.target.nextElementSibling;
+    label.innerHTML = fileName;
+});
+</script>
 @stop
+  

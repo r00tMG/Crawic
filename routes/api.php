@@ -6,6 +6,8 @@ use App\Http\Controllers\Api\ApiController;
 use App\Http\Controllers\Api\DomainController;
 use App\Http\Controllers\Api\BacklinkController;
 #use App\Http\Controllers\SEOController;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 /*
 |--------------------------------------------------------------------------
@@ -41,7 +43,13 @@ Route::get('/search-expired-domains', [DomainController::class, 'searchExpiredDo
 Route::post('/clean-expired-domains', [DomainController::class, 'findExpiredDomains']);
 Route::get('/clean-expired-domains', [DomainController::class, 'findExpiredDomains']);
 //Route::get('/expired-domains', [DomainController::class, 'fetchData']);
-Route::get('/expired-domains', [DomainController::class, 'todayexpirieddomain']);
+Route::get('/expired-domains', function() {
+    $today = Carbon::now()->toDateString();
+    $eda = DB::table('expiry_domain_cronjob')
+        ->whereDate('created_at', $today)
+        ->first();
+    return response()->json($eda);
+});
 Route::get('/search_expiry_domain', [DomainController::class, 'search_expiry_domain']);
 Route::get('/expired-domainstwo', [DomainController::class, 'todayexpirieddomaintwo']);
 Route::get('/expired-domainsthree', [DomainController::class, 'todayexpirieddomainthree']);

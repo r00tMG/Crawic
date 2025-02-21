@@ -2,13 +2,12 @@
 
 {{-- Page title --}}
 @section('title')
-User Profile
-@parent
+    View Profile
+    @parent
 @stop
 
 {{-- page level styles --}}
 @section('header_styles')
-
     <link href="{{ asset('vendors/iCheck/css/all.css') }}"  rel="stylesheet" type="text/css" />
     <link href="{{ asset('vendors/jasny-bootstrap/css/jasny-bootstrap.css') }}" rel="stylesheet" type="text/css" />
     {{--<link href="{{ asset('vendors/x-editable/css/bootstrap-editable.css') }}" rel="stylesheet" type="text/css" />--}}
@@ -27,9 +26,7 @@ User Profile
 @section('content')
 
 <section class="content-header">
-                <h1>
-                    User Profile
-                </h1>
+                <h1>Mon Profil</h1>
                 <ol class="breadcrumb">
                     <li>
                         <a href="{{ route('admin.dashboard') }}">
@@ -47,33 +44,43 @@ User Profile
                                 <div class="form-group">
                                     <div class="text-center">
                                         <div class="fileinput fileinput-new" data-provides="fileinput">
-                                            <div class="fileinput-new thumbnail ">
-                                                {{--<img src="{{ asset('img/authors/avatar3.jpg') }}" data-src="holder.js/366x218/#fff:#000" class="img-fluid" width="366px" height="218px" />--}}
-                                                @if(Sentinel::getUser()->pic)
-                                                    <img src="{!! url('/').'/uploads/users/'.Sentinel::getUser()->pic !!}" alt="img"
-                                                         class="img-fluid " width="366px" height="218px"/>
-
-                                                @elseif(Sentinel::getUser()->gender === "male")
-                                                    <img src="{{ asset('images/authors/avatar3.png') }}" alt="img"
-                                                         class="img-fluid " width="366px" height="218px"/>
-
-                                                @elseif(Sentinel::getUser()->gender === "female")
-                                                    <img src="{{ asset('images/authors/avatar5.png') }}" alt="img"
-                                                         class="img-fluid " width="366px" height="218px"/>
-                                                @else
-                                                    <img src="{{ asset('images/authors/no_avatar.jpg') }}" alt="img"
-                                                         class="img-fluid" width="366px" height="218px"/>
-                                                @endif
+                                            <div class="fileinput-new thumbnail">
+                                                @auth
+                                                    @if(auth()->user()->pic)
+                                                        <img src="{{ asset('uploads/users/' . auth()->user()->pic) }}" 
+                                                            alt="Profile Picture"
+                                                            class="img-fluid"
+                                                            width="366"
+                                                            height="218"/>
+                                                    @elseif(auth()->user()->gender === "male")
+                                                        <img src="{{ asset('images/authors/avatar3.png') }}"
+                                                            alt="Male Avatar"
+                                                            class="img-fluid"
+                                                            width="366"
+                                                            height="218"/>
+                                                    @elseif(auth()->user()->gender === "female")
+                                                        <img src="{{ asset('images/authors/avatar5.png') }}"
+                                                            alt="Female Avatar"
+                                                            class="img-fluid"
+                                                            width="366"
+                                                            height="218"/>
+                                                    @else
+                                                        <img src="{{ asset('images/authors/no_avatar.jpg') }}"
+                                                            alt="No Avatar"
+                                                            class="img-fluid"
+                                                            width="366"
+                                                            height="218"/>
+                                                    @endif
+                                                @endauth
                                             </div>
-                                            <div class="fileinput-preview fileinput-exists thumbnail" ></div>
-                                            <div>
-                                                <span class="btn btn-secondary btn-file">
-                                                    <span class="fileinput-new">
-                                                        Select image
-                                                    </span>
+                                            <div class="fileinput-preview fileinput-exists thumbnail"></div>
+                                            <div class="btn-group">
+                                                <span class="btn btn-default btn-file">
+                                                    <span class="fileinput-new">Select image</span>
                                                     <span class="fileinput-exists">Change</span>
-                                                    <input type="file" name="..."></span>
-                                                <a href="#" class="btn btn-secondary fileinput-exists" data-dismiss="fileinput">Remove</a>
+                                                    <input type="file" name="pic" accept="image/*">
+                                                </span>
+                                                <a href="#" class="btn btn-default fileinput-exists" data-dismiss="fileinput">Remove</a>
                                             </div>
                                         </div>
                                     </div>

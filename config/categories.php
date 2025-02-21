@@ -21,4 +21,4 @@ return [
         'business|corporate|company|entrepreneur|startup|management|industry|strategy|work|office' => 17, // Business
     ], 
     
-]
+];

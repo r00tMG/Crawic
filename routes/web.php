@@ -7,7 +7,11 @@ use App\Http\Controllers\Admin\LockscreenController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\SEOController;
 use App\Http\Controllers\DomainController;
-
+use App\Http\Controllers\Admin\AuthController;
+use App\Http\Controllers\Admin\UsersController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\JoshController;
 
 /*
 |--------------------------------------------------------------------------
@@ -99,6 +103,13 @@ require __DIR__.'/auth.php';
 
 Route::pattern('slug', '[a-z0-9- _]+');
 
+Route::get('login', [AuthController::class, 'getSignin'])->name('login');
+Route::post('signin', [AuthController::class, 'postSignin'])->name('signin');
+
+//Route::get('signin', [AuthController::class, 'getSignin'])->name('signin');
+Route::get('register', [AuthController::class, 'getSignup'])->name('register');
+Route::post('signup', [AuthController::class, 'postSignup'])->name('signup');
+
 Route::group(
     ['prefix' => 'admin', 'namespace' => 'Admin','middleware'=>'auth'],
     function () {
@@ -120,17 +131,14 @@ Route::group(
         Route::get('{id}/lockscreen', [LockscreenController::class, 'show'])->name('lockscreen');
         Route::post('{id}/lockscreen', [LockscreenController::class, 'check'])->name('lockscreen');
         // All basic routes defined here
-        Route::get('login', 'AuthController@getSignin')->name('login');
-        Route::get('signin', 'AuthController@getSignin')->name('signin');
-        Route::post('signin', 'AuthController@postSignin')->name('postSignin');
-        Route::post('signup', 'AuthController@postSignups')->name('admin.signup');
-        Route::post('forgot-password', 'AuthController@postForgotPassword')->name('forgot-password');
-        Route::get(
-            'login2',
-            function () {
-                return view('admin.login2');
-            }
-        );
+        Route::get('login', [AuthController::class, 'getSignin'])->name('login');
+
+        Route::get('register', [AuthController::class, 'getSignup'])->name('registerS');
+        Route::get('signin', [AuthController::class, 'getSignin'])->name('signin');
+        Route::post('signin', [AuthController::class, 'postSignin'])->name('postSignin');
+        
+        Route::post('signup', [AuthController::class, 'postSignup'])->name('admin.signup');
+        
 
         // Register2
         Route::get(
@@ -342,18 +350,20 @@ Route::group(
 
 // Remaining pages will be called from below controller method
 // in real world scenario, you may be required to define all routes manually
-
+Route::group(['middleware' => ['auth']], function() {
+    Route::resource('users', UsersController::class);
+    Route::resource('roles', RoleController::class);
+});
 Route::group(
     ['prefix' => 'admin', 'middleware' => 'admin'],
     function () {
-        Route::get('{name?}', 'JoshController@showView');
+        Route::get('/', [JoshController::class, 'showHome'])->name('admin.dashboard');
+        Route::get('{name?}', [JoshController::class, 'showView']);
     }
 );
 
 
-Route::group(
-    ['prefix' => 'user', 'namespace' => 'App\Http\Controllers', 'middleware' => 'auth'],//
-    function () {
+Route::group(['prefix' => 'user', 'namespace' => 'App\Http\Controllers', 'middleware' => 'auth'],function () {
 
     Route::get('domain_available', [DomainController::class, 'domain_available'])->name('domain_available');
     Route::get('domain_available_expired', [DomainController::class, 'domain_available_expired'])->name('domain_available_expired');
@@ -378,8 +388,18 @@ Route::group(
        
 });
 
-
+Route::post('/admin/domains/import', [DomainController::class, 'import'])->name('admin.domains.import');
 
 Route::fallback(function () {
     return view('front.404');
+});
+
+// Routes pour admin
+Route::group(['middleware' => ['sentinel.role:admin']], function () {
+    // Routes admin
+});
+
+// Routes pour user
+Route::group(['middleware' => ['sentinel.role:user']], function () {
+    // Routes user
 });
